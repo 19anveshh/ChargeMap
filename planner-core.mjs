@@ -91,6 +91,15 @@ function normalize(value, min, max) {
   return Math.max(0, Math.min(100, ((max - value) / (max - min)) * 100));
 }
 
+function chargingTimeScore(actualMinutes, preferredMinutes) {
+  if (actualMinutes <= preferredMinutes) {
+    // Meeting the preference exactly is perfect; faster stations remain high-scoring.
+    return 90 + (actualMinutes / preferredMinutes) * 10;
+  }
+  // Every minute above the user's target progressively reduces the score.
+  return Math.max(0, 100 - ((actualMinutes - preferredMinutes) / preferredMinutes) * 100);
+}
+
 export function planTrip(input = {}) {
   const batteryLevel = Math.max(0, Math.min(100, Number(input.batteryLevel ?? input.battery ?? 64)));
   const comfortableDistance = Math.max(1, Number(input.comfortableDistance ?? input.distance ?? 18));
@@ -101,8 +110,6 @@ export function planTrip(input = {}) {
   const shortestPaths = dijkstra(graph);
   const maxDistance = Math.max(...stationCatalog.map((station) => shortestPaths.distances[station.node]));
   const minDistance = Math.min(...stationCatalog.map((station) => shortestPaths.distances[station.node]));
-  const maxChargeTime = Math.max(...stationCatalog.map((station) => station.chargeTime));
-  const minChargeTime = Math.min(...stationCatalog.map((station) => station.chargeTime));
 
   const stations = stationCatalog.map((station) => {
     const distance = shortestPaths.distances[station.node];
@@ -112,7 +119,7 @@ export function planTrip(input = {}) {
     const scoreBreakdown = {
       distance: Number(normalize(distance, minDistance, maxDistance).toFixed(2)),
       batterySafety: Number(batterySafetyScore.toFixed(2)),
-      chargingTime: Number(normalize(station.chargeTime, minChargeTime, maxChargeTime).toFixed(2)),
+      chargingTime: Number(chargingTimeScore(station.chargeTime, preferredChargingTime).toFixed(2)),
       availability: station.available ? Number(((station.open / station.total) * 100).toFixed(2)) : 0
     };
     const finalScore = Object.entries(weights).reduce((sum, [key, weight]) => sum + scoreBreakdown[key] * weight, 0);
