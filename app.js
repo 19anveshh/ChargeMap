@@ -1,4 +1,4 @@
-const stationData = [
+let stationData = [
   {
     id: 'river', name: 'Riverfront Charge', shortAddress: '14 Harbor Way · East District', distance: 12.4, travelMin: 18, chargeTime: 24,
     available: true, open: 4, total: 6, fast: true, state: 'open',
@@ -22,7 +22,7 @@ const stationData = [
 ];
 
 const defaults = { battery: 64, distance: 18, chargeTime: 35, availability: 'available' };
-const state = { ...defaults, eligible: [], ranked: [], focusId: null, confirmed: false };
+const state = { ...defaults, eligible: [], ranked: [], focusId: null, confirmed: false, backendPlan: null, requestId: 0 };
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -49,6 +49,7 @@ function getStatus(station) {
 }
 
 function calculateScore(station) {
+  if (state.backendPlan && Number.isFinite(Number(station.score))) return Number(station.score);
   const availabilityBonus = station.available ? 10 : -12;
   const patiencePenalty = Math.max(0, station.chargeTime - state.chargeTime) * .25;
   const distancePenalty = station.distance * 2.1;
@@ -57,6 +58,12 @@ function calculateScore(station) {
 }
 
 function computeRanking() {
+  if (state.backendPlan) {
+    state.eligible = state.backendPlan.ranked || [];
+    state.ranked = state.backendPlan.ranked || [];
+    if (!state.focusId || !state.ranked.some((station) => station.id === state.focusId)) state.focusId = state.ranked[0]?.id || null;
+    return;
+  }
   const eligible = stationData.filter((station) => isWithinRange(station) && availabilityEligible(station));
   const ranked = eligible
     .map((station) => ({ ...station, score: calculateScore(station) }))
@@ -156,7 +163,7 @@ function renderRecommendation() {
   $('#recommendation-status').textContent = `${station.open} / ${station.total} open`;
   $('#route-distance').textContent = formatDistance(station.distance);
   $('#route-arrival').textContent = `${station.travelMin} min`;
-  const arrivalBattery = Math.max(0, Math.round(state.battery - (station.distance / 40) * 100));
+  const arrivalBattery = Number.isFinite(Number(station.arrivalBattery)) ? station.arrivalBattery : Math.max(0, Math.round(state.battery - (station.distance / 40) * 100));
   $('#route-battery').textContent = `${arrivalBattery}%`;
   $('#route-battery').style.color = arrivalBattery < 16 ? 'var(--amber)' : 'var(--mint)';
   $('#recommendation-card .success-tag').innerHTML = isBest ? '<span class="success-check"><svg><use href="#icon-check" /></svg></span> Best match' : '<span class="success-check"><svg><use href="#icon-route" /></svg></span> Preview';
@@ -181,13 +188,16 @@ function renderAlgorithm() {
   const station = focusedStation();
   const bars = $('#score-bars');
   if (!station) { bars.innerHTML = ''; return; }
-  const distancePart = Math.max(8, 100 - station.distance * 2.1);
-  const chargePart = Math.max(8, 100 - station.chargeTime * .55);
-  const availabilityPart = station.available ? 100 : 34;
+  const breakdown = station.scoreBreakdown || {};
+  const distancePart = breakdown.distance ?? Math.max(8, 100 - station.distance * 2.1);
+  const chargePart = breakdown.chargingTime ?? Math.max(8, 100 - station.chargeTime * .55);
+  const availabilityPart = breakdown.availability ?? (station.available ? 100 : 34);
+  const batteryPart = breakdown.batterySafety ?? 0;
   bars.innerHTML = [
-    ['DISTANCE COST', distancePart, `${Math.round(distancePart)}%`],
+    ['DISTANCE SCORE', distancePart, `${Math.round(distancePart)}%`],
     ['CHARGE TIME', chargePart, `${Math.round(chargePart)}%`],
-    ['AVAILABILITY', availabilityPart, `${Math.round(availabilityPart)}%`]
+    ['AVAILABILITY', availabilityPart, `${Math.round(availabilityPart)}%`],
+    ['BATTERY SAFETY', batteryPart, `${Math.round(batteryPart)}%`]
   ].map(([label, width, value]) => `<div class="score-bar-row"><span>${label}</span><span class="score-track"><span class="score-fill" style="width:${width}%"></span></span><b>${value}</b></div>`).join('');
 }
 
@@ -200,6 +210,52 @@ function render() {
   renderMap();
   renderAlgorithm();
   window.ChargePathMotion?.pop($('#recommendation-card'), 1.01);
+}
+
+function setApiStatus(label, online = false) {
+  const node = $('#api-status');
+  if (!node) return;
+  node.textContent = label;
+  node.style.color = online ? 'var(--mint)' : 'var(--amber)';
+}
+
+async function requestPlan({ toast = false } = {}) {
+  const requestId = ++state.requestId;
+  setApiStatus('SYNCING');
+  try {
+    const response = await fetch('/api/plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        batteryLevel: state.battery,
+        comfortableDistance: state.distance,
+        preferredChargingTime: state.chargeTime,
+        availability: state.availability,
+        weights: { distance: 0.35, batterySafety: 0.25, chargingTime: 0.20, availability: 0.20 }
+      })
+    });
+    if (!response.ok) throw new Error(`Planner API returned ${response.status}`);
+    const plan = await response.json();
+    if (requestId !== state.requestId) return;
+    stationData = plan.stations;
+    state.backendPlan = plan;
+    state.ranked = plan.ranked || [];
+    state.eligible = plan.ranked || [];
+    state.focusId = plan.best?.id || null;
+    render();
+    setApiStatus('ONLINE', true);
+    if (toast) showToast(plan.best ? `${plan.best.name} selected by the backend planner.` : 'No station clears current constraints.');
+  } catch (error) {
+    console.warn('Backend planner unavailable; using local preview fallback.', error);
+    setApiStatus('LOCAL FALLBACK');
+    if (toast) showToast('Backend unavailable; local preview is still active.');
+  }
+}
+
+let planDebounce;
+function schedulePlan() {
+  clearTimeout(planDebounce);
+  planDebounce = setTimeout(() => requestPlan(), 220);
 }
 
 let toastTimer;
@@ -229,7 +285,9 @@ $$('.preset-chip').forEach((chip) => {
       chargeTimeInput.value = p.chargeTime;
       availabilityInput.value = p.availability;
       state.focusId = null;
+      state.backendPlan = null;
       render();
+      schedulePlan();
       showToast(`Activated ${p.name}`);
     }
   });
@@ -238,20 +296,25 @@ $$('.preset-chip').forEach((chip) => {
 [batteryInput, distanceInput, chargeTimeInput].forEach((input) => input.addEventListener('input', () => {
   $$('.preset-chip').forEach((c) => c.classList.remove('active'));
   state.focusId = null;
+  state.backendPlan = null;
   render();
+  schedulePlan();
 }));
 
 availabilityInput.addEventListener('change', () => {
   $$('.preset-chip').forEach((c) => c.classList.remove('active'));
   state.focusId = null;
+  state.backendPlan = null;
   render();
   showToast('Availability filter updated.');
+  schedulePlan();
 });
 
 $('#recalculate').addEventListener('click', () => {
-  state.focusId = state.ranked[0]?.id || null;
+  state.focusId = null;
+  state.backendPlan = null;
   render();
-  showToast(state.ranked[0] ? `${state.ranked[0].name} recalculated as optimal.` : 'No station clears current constraints.');
+  requestPlan({ toast: true });
 });
 
 $('#reset-view').addEventListener('click', () => {
@@ -262,8 +325,10 @@ $('#reset-view').addEventListener('click', () => {
   $$('.preset-chip').forEach((c) => c.classList.remove('active'));
   $('#preset-default')?.classList.add('active');
   state.focusId = null;
+  state.backendPlan = null;
   render();
   showToast('Planner reset to default parameters.');
+  schedulePlan();
 });
 
 $('#confirm-route').addEventListener('click', () => {
@@ -305,3 +370,4 @@ $('#toggle-all').addEventListener('click', () => {
 });
 
 render();
+requestPlan();

@@ -51,7 +51,7 @@
           <span class="live-pill"><span class="live-dot"></span> SIMULATION ACTIVE</span>
           <div class="telemetry-badge">
             <svg><use href="#icon-cpu" /></svg>
-            <span>DIJKSTRA v2.4</span>
+            <span>API <b id="api-status">CONNECTING</b></span>
           </div>
           <button class="avatar" aria-label="Profile">CP</button>
         </div>
@@ -201,7 +201,7 @@
                   </div>
                   <div class="card-mini-stat">
                     <span>WEIGHTING</span>
-                    <strong class="neon-violet">Tri-Objective</strong>
+                    <strong class="neon-violet">4-factor weights</strong>
                   </div>
                 </div>
               </div>
@@ -630,14 +630,14 @@
           <div class="explanation-panel" id="explanation-panel" hidden>
             <div class="formula-box">
               <span class="formula-label">MATHEMATICAL SCORING FORMULA</span>
-              <code>match = 100 − (dist × 2.1) − (time × 0.55) − overshoot + bonus</code>
+              <code>score = .35D + .25B + .20T + .20A</code>
             </div>
             <div class="score-bars" id="score-bars">
               <!-- Dynamically populated by app.js -->
             </div>
             <div class="explanation-note">
               <svg><use href="#icon-info" /></svg>
-              <span>Battery feasibility is an absolute hard gate, not a soft penalty. A farther available station will always outrank an unavailable or stranded stop.</span>
+              <span>Battery feasibility is an absolute hard gate. The backend returns each normalized factor and accepts configurable weights before the Greedy selector picks the highest-scoring safe station.</span>
             </div>
           </div>
         </section>
