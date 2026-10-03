@@ -33,6 +33,10 @@
       <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
       <symbol id="icon-sparkles" viewBox="0 0 24 24"><path d="m12 3 1.9 4.8L18.7 9.7l-4.8 1.9L12 16.4l-1.9-4.8L5.3 9.7l4.8-1.9L12 3z"/><path d="M18.5 16l.9 2.2 2.2.9-2.2.9-.9 2.2-.9-2.2-2.2-.9 2.2-.9.9-2.2z"/></symbol>
       <symbol id="icon-cpu" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></symbol>
+      <symbol id="icon-speaker" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/></symbol>
+      <symbol id="icon-speaker-mute" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></symbol>
+      <symbol id="icon-play" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></symbol>
+      <symbol id="icon-navigation" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></symbol>
     </svg>
 
     <div class="page-shell">
@@ -48,6 +52,14 @@
           <a href="#about">Architecture</a>
         </nav>
         <div class="topbar-actions">
+          <button class="sound-toggle" id="sound-toggle" aria-label="Toggle UI Audio feedback" title="Toggle UI sound effects">
+            <svg class="sound-icon-off" id="sound-icon-off"><use href="#icon-speaker-mute" /></svg>
+            <svg class="sound-icon-on" id="sound-icon-on" style="display: none;"><use href="#icon-speaker" /></svg>
+            <span id="sound-label">AUDIO: OFF</span>
+          </button>
+          <div class="hotkeys-badge" title="Hotkeys: [1-4] Presets, [R] Recalculate, [E] DAA, [S] Stepper, [Esc] Close">
+            <kbd>1-4</kbd><kbd>R</kbd><kbd>E</kbd><kbd>S</kbd>
+          </div>
           <span class="live-pill"><span class="live-dot"></span> SIMULATION ACTIVE</span>
           <div class="telemetry-badge">
             <svg><use href="#icon-cpu" /></svg>
@@ -590,16 +602,22 @@
             <div>
               <p class="section-kicker">04 / THE DAA LAYER</p>
               <h2>Not Just the Nearest. The Smartest.</h2>
-              <p>Dijkstra computes optimal route shortest paths. A greedy selection heuristic evaluates feasibility and picks the globally superior candidate stop in deterministic time.</p>
+              <p>Dijkstra computes optimal route shortest paths over a road graph. A greedy selection heuristic evaluates battery feasibility and picks the globally superior candidate stop in deterministic time.</p>
             </div>
-            <button class="outline-button" id="explain-toggle">
-              <span>How the score works</span>
-              <svg><use href="#icon-chevron" /></svg>
-            </button>
+            <div class="algorithm-action-group">
+              <button class="primary-button simulation-btn" id="run-stepper">
+                <svg><use href="#icon-play" /></svg>
+                <span>Step-Through Simulation</span>
+              </button>
+              <button class="outline-button" id="explain-toggle">
+                <span>How the score works</span>
+                <svg><use href="#icon-chevron" /></svg>
+              </button>
+            </div>
           </div>
 
-          <div class="algorithm-steps">
-            <div class="algo-step">
+          <div class="algorithm-steps" id="algorithm-steps-container">
+            <div class="algo-step" id="step-dijkstra">
               <span class="step-number">01</span>
               <div class="step-icon cyan"><svg><use href="#icon-route" /></svg></div>
               <div>
@@ -608,7 +626,7 @@
               </div>
             </div>
             <div class="step-connector"></div>
-            <div class="algo-step">
+            <div class="algo-step" id="step-filter">
               <span class="step-number">02</span>
               <div class="step-icon violet"><svg><use href="#icon-grid" /></svg></div>
               <div>
@@ -617,7 +635,7 @@
               </div>
             </div>
             <div class="step-connector"></div>
-            <div class="algo-step">
+            <div class="algo-step" id="step-greedy">
               <span class="step-number">03</span>
               <div class="step-icon mint"><svg><use href="#icon-check" /></svg></div>
               <div>
@@ -628,6 +646,23 @@
           </div>
 
           <div class="explanation-panel" id="explanation-panel" hidden>
+            <!-- Real Dijkstra Telemetry & Reconstructed Path -->
+            <div class="dijkstra-telemetry-box" id="dijkstra-telemetry">
+              <div class="dijkstra-telemetry-top">
+                <span class="formula-label">DIJKSTRA RECONSTRUCTED SHORTEST PATH</span>
+                <span class="dijkstra-complexity">COMPLEXITY: O((V + E) log V)</span>
+              </div>
+              <div class="dijkstra-path-ribbon" id="dijkstra-path-ribbon">
+                <!-- Dynamically rendered path nodes: Origin -> Junction -> Terminal -->
+              </div>
+              <div class="dijkstra-stats-row">
+                <div class="dijkstra-stat"><span>Graph Nodes Visited:</span> <strong id="dijkstra-nodes-count">7 / 7</strong></div>
+                <div class="dijkstra-stat"><span>Edges Relaxed:</span> <strong id="dijkstra-edges-count">12 edges</strong></div>
+                <div class="dijkstra-stat"><span>Shortest Path Distance:</span> <strong id="dijkstra-path-dist" class="neon-cyan">12.4 km</strong></div>
+                <div class="dijkstra-stat"><span>Shortest Travel Time:</span> <strong id="dijkstra-path-time" class="neon-violet">18 min</strong></div>
+              </div>
+            </div>
+
             <div class="formula-box">
               <span class="formula-label">MATHEMATICAL SCORING FORMULA</span>
               <code>score = .35D + .25B + .20T + .20A</code>
@@ -663,6 +698,66 @@
     <div class="toast" id="toast" role="status" aria-live="polite">
       <span class="toast-icon"><svg><use href="#icon-check" /></svg></span>
       <span id="toast-message">Route locked in.</span>
+    </div>
+
+    <!-- Turn-by-Turn Navigation Cockpit Modal -->
+    <div class="modal-backdrop" id="nav-modal" hidden aria-hidden="true" role="dialog" aria-labelledby="modal-title">
+      <div class="nav-modal-card glass-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="eyebrow-pill"><span class="live-dot"></span> VEHICLE COCKPIT LINK ACTIVE</span>
+            <h2 id="modal-title">Route Guidance & Telemetry Manifest</h2>
+          </div>
+          <button class="icon-button modal-close" id="modal-close" aria-label="Close navigation manifest">
+            <svg><use href="#icon-chevron" /></svg>
+          </button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="manifest-hero">
+            <div class="manifest-station">
+              <span class="manifest-label">DESTINATION CHARGING TERMINAL</span>
+              <h3 id="manifest-station-name">Riverfront Charge</h3>
+              <p id="manifest-station-addr"><svg><use href="#icon-pin" /></svg> 14 Harbor Way · East District</p>
+            </div>
+            <div class="manifest-metrics-grid">
+              <div class="manifest-metric-cell">
+                <span>ESTIMATED ENERGY</span>
+                <strong id="manifest-energy" class="neon-cyan">2.2 kWh</strong>
+                <small>0.18 kWh / km rate</small>
+              </div>
+              <div class="manifest-metric-cell">
+                <span>ESTIMATED SESSION COST</span>
+                <strong id="manifest-cost" class="neon-mint">$4.80</strong>
+                <small>$0.38 / kWh rate</small>
+              </div>
+              <div class="manifest-metric-cell">
+                <span>CO₂ OFFSET VS ICE</span>
+                <strong id="manifest-co2" class="neon-violet">2.9 kg</strong>
+                <small>clean grid mix</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="turn-by-turn-section">
+            <span class="manifest-label">DIJKSTRA RECONSTRUCTED DRIVING MANEUVERS</span>
+            <div class="directions-list" id="directions-list">
+              <!-- Dynamically populated turn-by-turn maneuvers -->
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <div class="modal-sync-status">
+            <svg><use href="#icon-wifi" /></svg>
+            <span>Telemetry verified via simulated CAN-Bus · Stall reserved</span>
+          </div>
+          <button class="primary-button" id="start-guidance">
+            <span>Send to Apple CarPlay / Android Auto</span>
+            <svg><use href="#icon-navigation" /></svg>
+          </button>
+        </div>
+      </div>
     </div>
 
     <script src="/motion.js" defer></script>
