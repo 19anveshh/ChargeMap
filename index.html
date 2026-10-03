@@ -3,16 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#eefbff" />
-    <meta name="description" content="ChargePath — a transparent EV charging station planner powered by greedy ranking." />
-    <title>ChargePath — EV charging station planner</title>
+    <meta name="theme-color" content="#07090e" />
+    <meta name="description" content="ChargePath — Luxury EV intelligent routing and charging station planner powered by Dijkstra and Greedy ranking." />
+    <title>ChargePath — Autonomous EV Route & Charging Intelligence</title>
     <link rel="icon" href="/chargepath-mark.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Grotesk:wght@500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
+    <!-- Ambient cursor glow spotlight -->
+    <div class="ambient-spotlight" id="ambient-spotlight" aria-hidden="true"></div>
+    <div class="background-grid-glow" aria-hidden="true"></div>
+
     <svg class="svg-sprite" aria-hidden="true">
       <symbol id="icon-bolt" viewBox="0 0 24 24"><path d="m13.4 2-8 11.1h5.9L10.3 22l8.3-11.2h-6.1L13.4 2Z" /></symbol>
       <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" /></symbol>
@@ -26,127 +30,641 @@
       <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.7"/><path d="M12 10.7v5.5M12 7.5h.01"/></symbol>
       <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></symbol>
       <symbol id="icon-wifi" viewBox="0 0 24 24"><path d="M4.8 9.5a11 11 0 0 1 14.4 0M7.7 12.7a6.5 6.5 0 0 1 8.6 0M10.7 15.9a2.2 2.2 0 0 1 2.6 0"/><path d="M12 19h.01"/></symbol>
+      <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+      <symbol id="icon-sparkles" viewBox="0 0 24 24"><path d="m12 3 1.9 4.8L18.7 9.7l-4.8 1.9L12 16.4l-1.9-4.8L5.3 9.7l4.8-1.9L12 3z"/><path d="M18.5 16l.9 2.2 2.2.9-2.2.9-.9 2.2-.9-2.2-2.2-.9 2.2-.9.9-2.2z"/></symbol>
+      <symbol id="icon-cpu" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></symbol>
     </svg>
 
     <div class="page-shell">
       <header class="topbar">
         <a class="brand" href="/" aria-label="ChargePath home">
           <span class="brand-mark"><svg><use href="#icon-bolt" /></svg></span>
-          <span class="brand-name">charge<span>path</span></span>
+          <span class="brand-name">CHARGE<span>PATH</span></span>
         </a>
         <nav class="topnav" aria-label="Primary navigation">
           <a class="active" href="#planner">Planner <span class="nav-dot"></span></a>
-          <a href="#how-it-works">How it works</a>
-          <a href="#about">About</a>
+          <a href="#how-it-works">DAA Engine</a>
+          <a href="#showcase">Showcase</a>
+          <a href="#about">Architecture</a>
         </nav>
         <div class="topbar-actions">
-          <span class="live-pill"><span class="live-dot"></span> Demo mode</span>
+          <span class="live-pill"><span class="live-dot"></span> SIMULATION ACTIVE</span>
+          <div class="telemetry-badge">
+            <svg><use href="#icon-cpu" /></svg>
+            <span>DIJKSTRA v2.4</span>
+          </div>
           <button class="avatar" aria-label="Profile">CP</button>
         </div>
       </header>
 
       <main id="planner">
+        <!-- HERO SECTION WITH EDITORIAL TYPOGRAPHY & FLOATING 3D PERSPECTIVE SHOWCASE -->
         <section class="hero-block">
           <div class="hero-copy">
-            <p class="eyebrow"><span class="eyebrow-line"></span> Decision engine <span class="eyebrow-badge">v1.0</span></p>
-            <h1>One route.<br /><span>Zero guesswork.</span></h1>
-            <p class="hero-lede">A transparent way to find your smartest charging stop — balancing range, time, and availability in one glance.</p>
+            <div class="eyebrow">
+              <span class="eyebrow-pill"><svg><use href="#icon-sparkles" /></svg> NEXT-GEN MOBILITY INTELLIGENCE</span>
+              <span class="eyebrow-line"></span>
+              <span class="eyebrow-badge">ALGORITHMIC V1.0</span>
+            </div>
+            <h1 class="hero-title">
+              One route.<br />
+              <span class="gradient-text">Zero guesswork.</span>
+            </h1>
+            <p class="hero-lede">
+              A transparent EV terminal routing engine balancing battery safety guardrails, distance optimization, and real-time stall availability through explainable greedy heuristics.
+            </p>
             <div class="hero-proof">
-              <div class="proof-item"><span class="proof-icon cyan"><svg><use href="#icon-route" /></svg></span><span><strong>4 inputs</strong><small>nothing hidden</small></span></div>
-              <div class="proof-item"><span class="proof-icon violet"><svg><use href="#icon-sliders" /></svg></span><span><strong>Dijkstra + Greedy</strong><small>fully explainable</small></span></div>
+              <div class="proof-item">
+                <span class="proof-icon cyan"><svg><use href="#icon-route" /></svg></span>
+                <span><strong>4 Telemetry Vectors</strong><small>real-time input constraints</small></span>
+              </div>
+              <div class="proof-item">
+                <span class="proof-icon violet"><svg><use href="#icon-cpu" /></svg></span>
+                <span><strong>Dijkstra + Greedy</strong><small>deterministic & explainable</small></span>
+              </div>
+              <div class="proof-item">
+                <span class="proof-icon mint"><svg><use href="#icon-shield" /></svg></span>
+                <span><strong>10% Reserve Guard</strong><small>zero range anxiety floor</small></span>
+              </div>
             </div>
           </div>
+
           <div class="hero-orbit" aria-hidden="true">
-            <div class="orbit-ring ring-one"></div><div class="orbit-ring ring-two"></div><div class="orbit-ring ring-three"></div>
-            <span class="orbit-spark spark-one"></span><span class="orbit-spark spark-two"></span><span class="orbit-spark spark-three"></span>
-            <div class="orbit-core"><svg><use href="#icon-bolt" /></svg><span>READY</span></div>
+            <div class="orbit-halo"></div>
+            <div class="orbit-ring ring-one"></div>
+            <div class="orbit-ring ring-two"></div>
+            <div class="orbit-ring ring-three"></div>
+            <span class="orbit-spark spark-one"></span>
+            <span class="orbit-spark spark-two"></span>
+            <span class="orbit-spark spark-three"></span>
+            <div class="orbit-core">
+              <div class="orbit-core-glow"></div>
+              <svg><use href="#icon-bolt" /></svg>
+              <span>ENGINE READY</span>
+            </div>
           </div>
         </section>
 
+        <!-- 3D PERSPECTIVE CAROUSEL SHOWCASE (SQUARESPACE-INSPIRED LUXURY CARDS) -->
+        <section class="showcase-strip" id="showcase" aria-label="Engineering showcase">
+          <div class="showcase-header">
+            <div class="showcase-title-wrap">
+              <span class="section-kicker">PERSPECTIVE OVERVIEW</span>
+              <h2 class="showcase-heading">Designed for High-Consequence Decisions</h2>
+            </div>
+            <span class="showcase-tag"><svg><use href="#icon-bolt" /></svg> REAL-TIME HEURISTICS</span>
+          </div>
+
+          <div class="showcase-carousel">
+            <!-- Left Card: Graph Solver -->
+            <div class="showcase-card card-left">
+              <div class="card-glass-shine"></div>
+              <div class="card-top-bar">
+                <span class="card-number">01 / DAA LAYER</span>
+                <span class="card-chip">GRAPH SOLVER</span>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Dijkstra Shortest Path</h3>
+                <p class="card-desc">Explores bidirectional road segments, computing the exact Euclidean travel distance to every reachable node.</p>
+                <div class="card-metric-row">
+                  <div class="card-mini-stat">
+                    <span>COMPLEXITY</span>
+                    <strong>O(V log V + E)</strong>
+                  </div>
+                  <div class="card-mini-stat">
+                    <span>EXECUTION</span>
+                    <strong class="neon-cyan">&lt; 1.4 ms</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer-wire">
+                <div class="wire-dot active"></div>
+                <div class="wire-line"></div>
+                <div class="wire-dot"></div>
+              </div>
+            </div>
+
+            <!-- Center Card: Optimal Pick (Hero Card) -->
+            <div class="showcase-card card-center hero-showcase">
+              <div class="card-glass-shine"></div>
+              <div class="hero-badge-pill">
+                <span class="live-dot"></span> TOP RECOMMENDED STOP
+              </div>
+              <div class="card-top-bar">
+                <span class="card-number">02 / LIVE MATCH</span>
+                <span class="card-chip highlight">OPTIMAL PICK</span>
+              </div>
+              <div class="card-content">
+                <div class="hero-card-brand">
+                  <span class="hero-brand-name">RIVERFRONT CHARGE</span>
+                  <div class="hero-score-pill">
+                    <span class="hero-score-val">92</span>
+                    <span class="hero-score-label">MATCH SCORE</span>
+                  </div>
+                </div>
+                <p class="card-desc">Closest available high-speed stall that clears your battery guardrail while minimizing route overshoot.</p>
+                <div class="hero-stats-grid">
+                  <div class="hero-stat-cell">
+                    <span>DISTANCE</span>
+                    <strong>12.4 km</strong>
+                  </div>
+                  <div class="hero-stat-cell">
+                    <span>POWER</span>
+                    <strong class="neon-cyan">350 kW DC</strong>
+                  </div>
+                  <div class="hero-stat-cell">
+                    <span>AVAILABILITY</span>
+                    <strong class="neon-mint">4 / 6 Open</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="hero-card-cta">
+                <span class="cta-pulse"></span>
+                <span>SYNCHRONIZED WITH PLANNER</span>
+              </div>
+            </div>
+
+            <!-- Right Card: Greedy Heuristics -->
+            <div class="showcase-card card-right">
+              <div class="card-glass-shine"></div>
+              <div class="card-top-bar">
+                <span class="card-number">03 / FILTER & RANK</span>
+                <span class="card-chip">GREEDY RANK</span>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Multi-Goal Heuristic</h3>
+                <p class="card-desc">Hard feasibility gates enforce a 10% battery floor before the greedy engine ranks remaining options.</p>
+                <div class="card-metric-row">
+                  <div class="card-mini-stat">
+                    <span>SAFETY FLOOR</span>
+                    <strong class="neon-amber">10% Reserve</strong>
+                  </div>
+                  <div class="card-mini-stat">
+                    <span>WEIGHTING</span>
+                    <strong class="neon-violet">Tri-Objective</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer-wire">
+                <div class="wire-dot"></div>
+                <div class="wire-line"></div>
+                <div class="wire-dot active"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ROUTE INPUTS CONTROLS PANEL (ALL OPTIONS PRESERVED) -->
         <section class="input-panel glass-card" aria-labelledby="inputs-title">
           <div class="panel-heading">
-            <div><p class="section-kicker">01 / Route inputs</p><h2 id="inputs-title">Tell us what you have.</h2></div>
-            <span class="panel-tip"><svg><use href="#icon-info" /></svg> Adjust any value to replay the decision</span>
+            <div>
+              <p class="section-kicker">01 / ROUTE INPUTS</p>
+              <h2 id="inputs-title">Input Your Trip Parameters</h2>
+            </div>
+            <div class="heading-controls">
+              <span class="panel-tip"><svg><use href="#icon-info" /></svg> Dynamic simulation updates in real time</span>
+            </div>
           </div>
+
+          <!-- Quick Scenario Presets -->
+          <div class="preset-strip" role="group" aria-label="Route Presets">
+            <span class="preset-label">QUICK SCENARIOS:</span>
+            <button type="button" class="preset-chip active" data-preset="default" id="preset-default">⚡ Standard (64% · 18km · 35m)</button>
+            <button type="button" class="preset-chip" data-preset="low-batt" id="preset-low">🛡️ Low Battery Alert (18% · 10km · 25m)</button>
+            <button type="button" class="preset-chip" data-preset="long-haul" id="preset-long">🚀 Long-Haul Sprint (85% · 32km · 50m)</button>
+            <button type="button" class="preset-chip" data-preset="fast-only" id="preset-fast">⚡ High-Power Stalls Only</button>
+          </div>
+
           <div class="input-grid">
-            <div class="control-card">
-              <div class="control-top"><label for="battery">Current battery</label><span class="control-value"><output id="battery-value">64</output><small>%</small></span></div>
-              <input id="battery" type="range" min="8" max="100" value="64" step="1" />
-              <div class="range-meta"><span>critical <b>8%</b></span><span>full <b>100%</b></span></div>
+            <!-- 1. Current Battery -->
+            <div class="control-card" id="card-battery">
+              <div class="control-top">
+                <div class="control-title-wrap">
+                  <label for="battery">Current Battery</label>
+                  <span class="control-sub">Vehicle telemetry</span>
+                </div>
+                <span class="control-value">
+                  <output id="battery-value">64</output>
+                  <small>%</small>
+                </span>
+              </div>
+              <div class="slider-wrapper">
+                <input id="battery" type="range" min="8" max="100" value="64" step="1" aria-label="Current battery percentage" />
+                <div class="slider-track-glow"></div>
+              </div>
+              <div class="range-meta">
+                <span class="danger-meta"><i class="meta-dot red"></i> critical <b>8%</b></span>
+                <span class="success-meta"><i class="meta-dot green"></i> full <b>100%</b></span>
+              </div>
             </div>
-            <div class="control-card">
-              <div class="control-top"><label for="distance">Comfortable distance</label><span class="control-value"><output id="distance-value">18</output><small> km</small></span></div>
-              <input id="distance" type="range" min="4" max="40" value="18" step="1" />
-              <div class="range-meta"><span>nearby <b>4 km</b></span><span>far <b>40 km</b></span></div>
+
+            <!-- 2. Comfortable Distance -->
+            <div class="control-card" id="card-distance">
+              <div class="control-top">
+                <div class="control-title-wrap">
+                  <label for="distance">Comfortable Distance</label>
+                  <span class="control-sub">Max detour radius</span>
+                </div>
+                <span class="control-value">
+                  <output id="distance-value">18</output>
+                  <small> km</small>
+                </span>
+              </div>
+              <div class="slider-wrapper">
+                <input id="distance" type="range" min="4" max="40" value="18" step="1" aria-label="Comfortable distance in kilometers" />
+                <div class="slider-track-glow"></div>
+              </div>
+              <div class="range-meta">
+                <span>nearby <b>4 km</b></span>
+                <span>far <b>40 km</b></span>
+              </div>
             </div>
-            <div class="control-card">
-              <div class="control-top"><label for="charge-time">Charging patience</label><span class="control-value"><output id="charge-time-value">35</output><small> min</small></span></div>
-              <input id="charge-time" type="range" min="15" max="60" value="35" step="1" />
-              <div class="range-meta"><span>quick stop <b>15 min</b></span><span>top-up <b>60 min</b></span></div>
+
+            <!-- 3. Charging Patience -->
+            <div class="control-card" id="card-charge-time">
+              <div class="control-top">
+                <div class="control-title-wrap">
+                  <label for="charge-time">Charging Patience</label>
+                  <span class="control-sub">Target session cap</span>
+                </div>
+                <span class="control-value">
+                  <output id="charge-time-value">35</output>
+                  <small> min</small>
+                </span>
+              </div>
+              <div class="slider-wrapper">
+                <input id="charge-time" type="range" min="15" max="60" value="35" step="1" aria-label="Charging patience in minutes" />
+                <div class="slider-track-glow"></div>
+              </div>
+              <div class="range-meta">
+                <span>quick stop <b>15 min</b></span>
+                <span>top-up <b>60 min</b></span>
+              </div>
             </div>
-            <div class="control-card select-card">
-              <div class="control-top"><label for="availability">Station availability</label><span class="availability-mark"><span class="live-dot"></span> Live filter</span></div>
-              <div class="select-wrap"><select id="availability"><option value="available">Available now</option><option value="all">Show all stations</option><option value="fast">Fast chargers only</option></select><svg><use href="#icon-chevron" /></svg></div>
-              <div class="range-meta"><span>Included <b id="availability-count">4 stations</b></span><span class="check-note"><svg><use href="#icon-check" /></svg> ready</span></div>
+
+            <!-- 4. Station Availability -->
+            <div class="control-card select-card" id="card-availability">
+              <div class="control-top">
+                <div class="control-title-wrap">
+                  <label for="availability">Station Availability</label>
+                  <span class="control-sub">Live stall status</span>
+                </div>
+                <span class="availability-mark">
+                  <span class="live-dot"></span> Live filter
+                </span>
+              </div>
+              <div class="select-wrap">
+                <select id="availability" aria-label="Station availability filter">
+                  <option value="available">Available now</option>
+                  <option value="all">Show all stations</option>
+                  <option value="fast">Fast chargers only</option>
+                </select>
+                <div class="select-indicator"><svg><use href="#icon-chevron" /></svg></div>
+              </div>
+              <div class="range-meta">
+                <span>Included <b id="availability-count">4 stations</b></span>
+                <span class="check-note"><svg><use href="#icon-check" /></svg> ready</span>
+              </div>
             </div>
           </div>
-          <div class="input-footer"><div class="assumption"><span class="assumption-icon"><svg><use href="#icon-bolt" /></svg></span><span><strong>Battery guardrail active</strong><small>We reserve 10% charge for a safe arrival.</small></span></div><button class="primary-button" id="recalculate"><span>Recalculate route</span><svg><use href="#icon-arrow" /></svg></button></div>
+
+          <div class="input-footer">
+            <div class="assumption">
+              <span class="assumption-icon"><svg><use href="#icon-shield" /></svg></span>
+              <span>
+                <strong>Battery Guardrail Active</strong>
+                <small>Reserves a strict 10% SOC buffer for contingency travel.</small>
+              </span>
+            </div>
+            <div class="action-buttons">
+              <button class="primary-button" id="recalculate">
+                <span>Recalculate Route</span>
+                <svg><use href="#icon-arrow" /></svg>
+              </button>
+            </div>
+          </div>
         </section>
 
+        <!-- DASHBOARD GRID: MAP CONTEXT + RECOMMENDATION & ALTERNATIVES -->
         <section class="dashboard-grid" aria-label="Planner results">
           <div class="map-column">
             <div class="map-card glass-card">
-              <div class="map-header"><div><p class="section-kicker">02 / Route context</p><h2>Your decision, mapped.</h2></div><div class="map-mode"><span class="mode-dot"></span> Simulated city grid</div></div>
+              <div class="map-header">
+                <div>
+                  <p class="section-kicker">02 / ROUTE CONTEXT</p>
+                  <h2>Your Decision, Mapped.</h2>
+                </div>
+                <div class="map-telemetry-cluster">
+                  <div class="map-mode"><span class="mode-dot"></span> SIMULATED CITY GRID</div>
+                  <div class="hud-coords">SYS: ONLINE · GRID 40.71°N</div>
+                </div>
+              </div>
+
               <div class="map-canvas" id="map-canvas">
-                <div class="map-wash wash-one"></div><div class="map-wash wash-two"></div>
+                <div class="map-wash wash-one"></div>
+                <div class="map-wash wash-two"></div>
+                <div class="hud-radar-sweep"></div>
+                <div class="hud-corner top-left"></div>
+                <div class="hud-corner top-right"></div>
+                <div class="hud-corner bottom-left"></div>
+                <div class="hud-corner bottom-right"></div>
+
                 <svg class="map-svg" viewBox="0 0 800 490" role="img" aria-label="Simulated route map">
-                  <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#94cbd2" stroke-opacity=".18" stroke-width="1" /></pattern><linearGradient id="routeGradient" x1="0" x2="1"><stop offset="0" stop-color="#11c5e8"/><stop offset="1" stop-color="#7455f6"/></linearGradient></defs>
+                  <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                      <path d="M40 0H0V40" fill="none" stroke="#00f2fe" stroke-opacity=".08" stroke-width="1" />
+                    </pattern>
+                    <linearGradient id="routeGradient" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#00f2fe"/>
+                      <stop offset="50%" stop-color="#38bdf8"/>
+                      <stop offset="100%" stop-color="#8b5cf6"/>
+                    </linearGradient>
+                    <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+                      <feGaussianBlur stdDeviation="4" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  
                   <rect width="800" height="490" fill="url(#grid)" />
+                  
+                  <!-- City Road Arteries -->
                   <path class="road road-one" d="M-20 380C130 350 150 270 270 290s130 140 260 110 150-120 290-100" />
                   <path class="road road-two" d="M80 -30c-10 115 60 170 110 235s45 120 0 295" />
                   <path class="road road-three" d="M270 -20c-20 100 70 160 170 190s115 120 80 320" />
                   <path class="road road-four" d="M535 -20c-55 135-25 210 45 275s80 115 75 250" />
                   <path class="road road-five" d="M-30 130c130 55 245 35 350-15s200-50 480 90" />
                   <path class="road road-six" d="M-30 235c140-25 205 25 310 100s250 85 540 55" />
+                  
+                  <!-- Dynamic Route Paths -->
                   <path class="route-shadow" id="route-shadow" d="M118 373 C190 340 212 300 285 268 C350 240 406 230 460 202" />
-                  <path class="active-route" id="active-route" d="M118 373 C190 340 212 300 285 268 C350 240 406 230 460 202" />
-                  <circle class="route-pulse" cx="118" cy="373" r="17" /><circle class="route-pulse pulse-second" cx="460" cy="202" r="17" />
+                  <path class="active-route" id="active-route" filter="url(#neonGlow)" d="M118 373 C190 340 212 300 285 268 C350 240 406 230 460 202" />
+                  
+                  <!-- Pulse Rings at Terminus Points -->
+                  <circle class="route-pulse" cx="118" cy="373" r="17" />
+                  <circle class="route-pulse pulse-second" cx="460" cy="202" r="17" />
                 </svg>
-                <div class="map-label origin-label"><span class="label-dot origin-dot"></span><div><b>You are here</b><small>Origin · Midtown</small></div></div>
-                <button class="station-pin pin-north" data-station="north" aria-label="Select North Loop station"><span class="pin-pulse"></span><span class="pin-core">N</span><span class="pin-tooltip">North Loop</span></button>
-                <button class="station-pin pin-river" data-station="river" aria-label="Select Riverfront station"><span class="pin-pulse"></span><span class="pin-core">R</span><span class="pin-tooltip">Riverfront</span></button>
-                <button class="station-pin pin-solar" data-station="solar" aria-label="Select Solar Plaza station"><span class="pin-pulse"></span><span class="pin-core">S</span><span class="pin-tooltip">Solar Plaza</span></button>
-                <button class="station-pin pin-park" data-station="park" aria-label="Select Parkside station"><span class="pin-pulse"></span><span class="pin-core">P</span><span class="pin-tooltip">Parkside</span></button>
-                <div class="map-scale"><span></span><b>5 km</b></div>
-                <div class="map-legend"><span><i class="legend-dot you"></i> Your location</span><span><i class="legend-dot selected"></i> Best match</span><span><i class="legend-dot other"></i> Alternative</span></div>
+
+                <div class="map-label origin-label">
+                  <span class="label-dot origin-dot"></span>
+                  <div>
+                    <b>YOU ARE HERE</b>
+                    <small>Origin · Midtown Center</small>
+                  </div>
+                </div>
+
+                <!-- Station Pins -->
+                <button class="station-pin pin-north" data-station="north" aria-label="Select North Loop station">
+                  <span class="pin-pulse"></span>
+                  <span class="pin-core">N</span>
+                  <span class="pin-tooltip">North Loop · Busy</span>
+                </button>
+                <button class="station-pin pin-river" data-station="river" aria-label="Select Riverfront station">
+                  <span class="pin-pulse"></span>
+                  <span class="pin-core">R</span>
+                  <span class="pin-tooltip">Riverfront · Optimal</span>
+                </button>
+                <button class="station-pin pin-solar" data-station="solar" aria-label="Select Solar Plaza station">
+                  <span class="pin-pulse"></span>
+                  <span class="pin-core">S</span>
+                  <span class="pin-tooltip">Solar Plaza · 6 Open</span>
+                </button>
+                <button class="station-pin pin-park" data-station="park" aria-label="Select Parkside station">
+                  <span class="pin-pulse"></span>
+                  <span class="pin-core">P</span>
+                  <span class="pin-tooltip">Parkside · 24.6 km</span>
+                </button>
+
+                <div class="map-scale">
+                  <span></span>
+                  <b>5 KM SCALE</b>
+                </div>
+
+                <div class="map-legend">
+                  <span><i class="legend-dot you"></i> Current Location</span>
+                  <span><i class="legend-dot selected"></i> Recommended Stop</span>
+                  <span><i class="legend-dot other"></i> Feasible Option</span>
+                </div>
               </div>
-              <div class="route-foot"><div class="route-stat"><span class="stat-icon cyan"><svg><use href="#icon-route" /></svg></span><span><small>Selected route</small><strong id="route-distance">12.4 km</strong></span></div><div class="route-stat"><span class="stat-icon violet"><svg><use href="#icon-clock" /></svg></span><span><small>Estimated arrival</small><strong id="route-arrival">18 min</strong></span></div><div class="route-stat"><span class="stat-icon mint"><svg><use href="#icon-bolt" /></svg></span><span><small>Battery at arrival</small><strong id="route-battery">51%</strong></span></div><div class="route-confidence"><span class="confidence-ring">98</span><span><small>decision confidence</small><strong>High confidence</strong></span></div></div>
+
+              <!-- Route Telemetry Footer -->
+              <div class="route-foot">
+                <div class="route-stat">
+                  <span class="stat-icon cyan"><svg><use href="#icon-route" /></svg></span>
+                  <span>
+                    <small>SELECTED ROUTE</small>
+                    <strong id="route-distance">12.4 km</strong>
+                  </span>
+                </div>
+                <div class="route-stat">
+                  <span class="stat-icon violet"><svg><use href="#icon-clock" /></svg></span>
+                  <span>
+                    <small>ESTIMATED ARRIVAL</small>
+                    <strong id="route-arrival">18 min</strong>
+                  </span>
+                </div>
+                <div class="route-stat">
+                  <span class="stat-icon mint"><svg><use href="#icon-bolt" /></svg></span>
+                  <span>
+                    <small>BATTERY AT ARRIVAL</small>
+                    <strong id="route-battery">51%</strong>
+                  </span>
+                </div>
+                <div class="route-confidence">
+                  <div class="confidence-ring" id="confidence-ring">
+                    <span>98</span>
+                  </div>
+                  <span>
+                    <small>DECISION CONFIDENCE</small>
+                    <strong>High Confidence</strong>
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
+          <!-- RESULTS COLUMN: RECOMMENDATION + ALTERNATIVES -->
           <aside class="results-column">
+            <!-- Best Match Card -->
             <div class="recommendation-card glass-card" id="recommendation-card">
-              <div class="recommendation-top"><span class="success-tag"><span class="success-check"><svg><use href="#icon-check" /></svg></span> Best match</span><span class="rank-label">Rank <b>#1</b></span></div>
-              <div class="recommendation-title"><div><p class="section-kicker">Recommended stop</p><h2 id="recommendation-name">Riverfront Charge</h2><p class="recommendation-address" id="recommendation-address"><svg><use href="#icon-pin" /></svg> 14 Harbor Way · East District</p></div><div class="recommendation-score"><strong id="recommendation-score">92</strong><span>match score</span></div></div>
-              <div class="recommendation-metrics"><div><span class="metric-icon cyan"><svg><use href="#icon-route" /></svg></span><span><small>Distance</small><strong id="recommendation-distance">12.4 km</strong></span></div><div><span class="metric-icon violet"><svg><use href="#icon-clock" /></svg></span><span><small>Charge time</small><strong id="recommendation-time">24 min</strong></span></div><div><span class="metric-icon mint"><svg><use href="#icon-wifi" /></svg></span><span><small>Availability</small><strong id="recommendation-status">4 / 6 open</strong></span></div></div>
-              <div class="recommendation-reason"><div class="reason-head"><span><svg><use href="#icon-bolt" /></svg> Why this wins</span><span class="reason-tag">Greedy pick</span></div><p id="recommendation-reason-text">It is the closest available stop that stays inside your battery guardrail — with a fast enough top-up to keep the trip moving.</p></div>
-              <button class="route-button" id="confirm-route"><span>Choose this station</span><svg><use href="#icon-arrow" /></svg></button>
+              <div class="card-ambient-glow"></div>
+              <div class="recommendation-top">
+                <span class="success-tag">
+                  <span class="success-check"><svg><use href="#icon-check" /></svg></span>
+                  Best match
+                </span>
+                <span class="rank-label">Rank <b>#1</b></span>
+              </div>
+
+              <div class="recommendation-title">
+                <div>
+                  <p class="section-kicker">RECOMMENDED STOP</p>
+                  <h2 id="recommendation-name">Riverfront Charge</h2>
+                  <p class="recommendation-address" id="recommendation-address">
+                    <svg><use href="#icon-pin" /></svg> 14 Harbor Way · East District
+                  </p>
+                </div>
+                <div class="recommendation-score">
+                  <div class="score-circle-wrapper">
+                    <svg class="score-circle-svg" viewBox="0 0 80 80">
+                      <circle class="score-circle-bg" cx="40" cy="40" r="34" />
+                      <circle class="score-circle-bar" id="score-circle-progress" cx="40" cy="40" r="34" />
+                    </svg>
+                    <strong id="recommendation-score">92</strong>
+                  </div>
+                  <span>MATCH SCORE</span>
+                </div>
+              </div>
+
+              <div class="recommendation-metrics">
+                <div>
+                  <span class="metric-icon cyan"><svg><use href="#icon-route" /></svg></span>
+                  <span>
+                    <small>Distance</small>
+                    <strong id="recommendation-distance">12.4 km</strong>
+                  </span>
+                </div>
+                <div>
+                  <span class="metric-icon violet"><svg><use href="#icon-clock" /></svg></span>
+                  <span>
+                    <small>Charge Time</small>
+                    <strong id="recommendation-time">24 min</strong>
+                  </span>
+                </div>
+                <div>
+                  <span class="metric-icon mint"><svg><use href="#icon-wifi" /></svg></span>
+                  <span>
+                    <small>Availability</small>
+                    <strong id="recommendation-status">4 / 6 open</strong>
+                  </span>
+                </div>
+              </div>
+
+              <div class="recommendation-reason">
+                <div class="reason-head">
+                  <span><svg><use href="#icon-bolt" /></svg> Why This Wins</span>
+                  <span class="reason-tag">Greedy Pick</span>
+                </div>
+                <p id="recommendation-reason-text">
+                  It is the closest available stop that stays inside your battery guardrail — with a fast enough top-up to keep the trip moving.
+                </p>
+              </div>
+
+              <button class="route-button" id="confirm-route">
+                <span>Choose this station</span>
+                <svg><use href="#icon-arrow" /></svg>
+              </button>
             </div>
 
-            <div class="alternatives-card glass-card"><div class="list-header"><div><p class="section-kicker">03 / Alternatives</p><h2>Every option, ranked.</h2></div><button class="icon-button" id="reset-view" aria-label="Reset filters"><svg><use href="#icon-refresh" /></svg></button></div><div class="station-list" id="station-list"></div><div class="list-foot"><span><span class="mini-live"></span> Simulated availability</span><button id="toggle-all">View decision details <svg><use href="#icon-arrow" /></svg></button></div></div>
+            <!-- Alternatives Card -->
+            <div class="alternatives-card glass-card">
+              <div class="list-header">
+                <div>
+                  <p class="section-kicker">03 / ALTERNATIVES</p>
+                  <h2>Every Option, Ranked.</h2>
+                </div>
+                <button class="icon-button" id="reset-view" aria-label="Reset filters" title="Reset scenario">
+                  <svg><use href="#icon-refresh" /></svg>
+                </button>
+              </div>
+
+              <div class="station-list" id="station-list">
+                <!-- Dynamically populated by app.js -->
+              </div>
+
+              <div class="list-foot">
+                <span><span class="mini-live"></span> Simulated availability</span>
+                <button id="toggle-all">
+                  View decision details <svg><use href="#icon-arrow" /></svg>
+                </button>
+              </div>
+            </div>
           </aside>
         </section>
 
+        <!-- ALGORITHM EXPLANATION SECTION (DAA LAYER) -->
         <section class="algorithm-section glass-card" id="how-it-works">
-              <div class="algorithm-header"><div><p class="section-kicker">04 / The DAA layer</p><h2>Not just the nearest. The smartest.</h2><p>Dijkstra finds the shortest route. Greedy ranking chooses the best eligible stop right now.</p></div><button class="outline-button" id="explain-toggle"><span>How the score works</span><svg><use href="#icon-chevron" /></svg></button></div>
-              <div class="algorithm-steps"><div class="algo-step"><span class="step-number">01</span><div class="step-icon cyan"><svg><use href="#icon-route" /></svg></div><div><h3>Find the route</h3><p>Dijkstra explores the simulated road graph and reconstructs the shortest path to every station.</p></div></div><div class="step-connector"></div><div class="algo-step"><span class="step-number">02</span><div class="step-icon violet"><svg><use href="#icon-grid" /></svg></div><div><h3>Filter + score</h3><p>Remove impossible stops, then blend route distance, charging time, and availability.</p></div></div><div class="step-connector"></div><div class="algo-step"><span class="step-number">03</span><div class="step-icon mint"><svg><use href="#icon-check" /></svg></div><div><h3>Choose greedily</h3><p>Select the highest score, with shortest distance as the tie-breaker.</p></div></div></div>
-              <div class="explanation-panel" id="explanation-panel" hidden><div class="formula-box"><span class="formula-label">Current scoring formula</span><code>match = 100 − (distance × 2.1) − (chargeTime × 0.55) − time overshoot + availability bonus</code></div><div class="score-bars" id="score-bars"></div><div class="explanation-note"><svg><use href="#icon-info" /></svg><span>Battery feasibility is a hard gate, not a soft preference. That is why a farther available station can still beat a closer unavailable one.</span></div></div>
+          <div class="algorithm-header">
+            <div>
+              <p class="section-kicker">04 / THE DAA LAYER</p>
+              <h2>Not Just the Nearest. The Smartest.</h2>
+              <p>Dijkstra computes optimal route shortest paths. A greedy selection heuristic evaluates feasibility and picks the globally superior candidate stop in deterministic time.</p>
+            </div>
+            <button class="outline-button" id="explain-toggle">
+              <span>How the score works</span>
+              <svg><use href="#icon-chevron" /></svg>
+            </button>
+          </div>
+
+          <div class="algorithm-steps">
+            <div class="algo-step">
+              <span class="step-number">01</span>
+              <div class="step-icon cyan"><svg><use href="#icon-route" /></svg></div>
+              <div>
+                <h3>Find the Route</h3>
+                <p>Dijkstra explores the road graph and reconstructs the shortest path to every station.</p>
+              </div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="algo-step">
+              <span class="step-number">02</span>
+              <div class="step-icon violet"><svg><use href="#icon-grid" /></svg></div>
+              <div>
+                <h3>Filter + Score</h3>
+                <p>Prune unreachable stops under battery reserve, then weigh distance, charge time, and live stalls.</p>
+              </div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="algo-step">
+              <span class="step-number">03</span>
+              <div class="step-icon mint"><svg><use href="#icon-check" /></svg></div>
+              <div>
+                <h3>Choose Greedily</h3>
+                <p>Select highest scoring eligible candidate, with shortest distance resolving any ties.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="explanation-panel" id="explanation-panel" hidden>
+            <div class="formula-box">
+              <span class="formula-label">MATHEMATICAL SCORING FORMULA</span>
+              <code>match = 100 − (dist × 2.1) − (time × 0.55) − overshoot + bonus</code>
+            </div>
+            <div class="score-bars" id="score-bars">
+              <!-- Dynamically populated by app.js -->
+            </div>
+            <div class="explanation-note">
+              <svg><use href="#icon-info" /></svg>
+              <span>Battery feasibility is an absolute hard gate, not a soft penalty. A farther available station will always outrank an unavailable or stranded stop.</span>
+            </div>
+          </div>
         </section>
       </main>
 
-      <footer class="footer" id="about"><span class="footer-brand"><span class="brand-mark small"><svg><use href="#icon-bolt" /></svg></span> chargepath</span><span>Built for the road ahead · Frontend demo · Dijkstra + Greedy</span><span class="footer-status"><span class="live-dot"></span> All systems simulated</span></footer>
+      <footer class="footer" id="about">
+        <div class="footer-left">
+          <span class="footer-brand">
+            <span class="brand-mark small"><svg><use href="#icon-bolt" /></svg></span>
+            CHARGEPATH
+          </span>
+          <span class="footer-note">Built for zero range anxiety · Dijkstra Shortest Path + Greedy Heuristic Model</span>
+        </div>
+        <div class="footer-right">
+          <span class="footer-status">
+            <span class="live-dot"></span> ALL TELEMETRY SIMULATED
+          </span>
+        </div>
+      </footer>
     </div>
-    <div class="toast" id="toast" role="status" aria-live="polite"><span class="toast-icon"><svg><use href="#icon-check" /></svg></span><span id="toast-message">Route locked in.</span></div>
+
+    <!-- Interactive Toast Message -->
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <span class="toast-icon"><svg><use href="#icon-check" /></svg></span>
+      <span id="toast-message">Route locked in.</span>
+    </div>
+
     <script src="/motion.js" defer></script>
     <script src="/app.js" defer></script>
   </body>

@@ -69,7 +69,7 @@ function computeRanking() {
 function setSliderBackground(input) {
   const min = Number(input.min); const max = Number(input.max); const value = Number(input.value);
   const percent = ((value - min) / (max - min)) * 100;
-  input.style.background = `linear-gradient(90deg, var(--cyan) 0%, var(--cyan) ${percent}%, rgba(82, 166, 183, .15) ${percent}%, rgba(82, 166, 183, .15) 100%)`;
+  input.style.background = `linear-gradient(90deg, #00f2fe 0%, #7952ff ${percent}%, rgba(255, 255, 255, 0.08) ${percent}%, rgba(255, 255, 255, 0.08) 100%)`;
 }
 
 function syncInputs() {
@@ -102,16 +102,16 @@ function renderStationList() {
     const disabled = station.status.type !== 'eligible' ? ' unreachable' : '';
     return `<button class="station-row${selected}${disabled}" data-row-station="${station.id}" ${station.status.type === 'unreachable' ? 'disabled' : ''}>
       <span class="station-rank">${rank}</span>
-      <span class="station-info"><strong>${station.name}</strong><small>${formatDistance(station.distance)} · ${station.chargeTime} min</small></span>
+      <span class="station-info"><strong>${station.name}</strong><small>${formatDistance(station.distance)} · ${station.chargeTime} min · ${station.open}/${station.total} open</small></span>
       <span class="status-badge ${station.status.className}">${station.status.label}</span>
-      <span class="station-score"><strong>${Math.round(station.score)}</strong><small>score</small></span>
+      <span class="station-score"><strong>${Math.round(station.score)}</strong><small>SCORE</small></span>
     </button>`;
   }).join('');
   window.ChargePathMotion?.reveal(list.querySelectorAll('.station-row'), { duration: 460, stagger: 55, y: 10, scale: .99 });
   $$('#station-list [data-row-station]').forEach((row) => row.addEventListener('click', () => {
     state.focusId = row.dataset.rowStation;
     render();
-    showToast(`${stationById(state.focusId).name} previewed on the route.`);
+    showToast(`${stationById(state.focusId).name} selected for route preview.`);
   }));
 }
 
@@ -121,10 +121,14 @@ function focusedStation() { return stationById(state.focusId) || state.ranked[0]
 function renderRecommendation() {
   const station = focusedStation();
   const best = state.ranked[0];
+  const progressCircle = $('#score-circle-progress');
+  const circumference = 213.63; // 2 * pi * 34
+
   if (!station) {
     $('#recommendation-name').textContent = 'No safe match yet';
     $('#recommendation-address').innerHTML = '<svg><use href="#icon-info" /></svg> Widen the distance or charge window';
     $('#recommendation-score').textContent = '—';
+    if (progressCircle) progressCircle.style.strokeDashoffset = `${circumference}`;
     $('#recommendation-distance').textContent = '—';
     $('#recommendation-time').textContent = '—';
     $('#recommendation-status').textContent = '0 stations';
@@ -134,10 +138,19 @@ function renderRecommendation() {
     return;
   }
   const isBest = best && station.id === best.id;
+  const score = Math.round(calculateScore(station));
+
   $('#recommendation-name').textContent = station.name;
   $('#recommendation-address').innerHTML = `<svg><use href="#icon-pin" /></svg> ${station.shortAddress}`;
-  $('#recommendation-score').textContent = Math.round(calculateScore(station));
-  window.ChargePathMotion?.countTo($('#recommendation-score'), Math.round(calculateScore(station)), 560);
+  $('#recommendation-score').textContent = score;
+  window.ChargePathMotion?.countTo($('#recommendation-score'), score, 560);
+
+  // Update radial score circle
+  if (progressCircle) {
+    const offset = Math.max(0, circumference * (1 - score / 100));
+    progressCircle.style.strokeDashoffset = `${offset}`;
+  }
+
   $('#recommendation-distance').textContent = formatDistance(station.distance);
   $('#recommendation-time').textContent = `${station.chargeTime} min`;
   $('#recommendation-status').textContent = `${station.open} / ${station.total} open`;
@@ -145,12 +158,12 @@ function renderRecommendation() {
   $('#route-arrival').textContent = `${station.travelMin} min`;
   const arrivalBattery = Math.max(0, Math.round(state.battery - (station.distance / 40) * 100));
   $('#route-battery').textContent = `${arrivalBattery}%`;
-  $('#route-battery').style.color = arrivalBattery < 16 ? 'var(--amber)' : '';
+  $('#route-battery').style.color = arrivalBattery < 16 ? 'var(--amber)' : 'var(--mint)';
   $('#recommendation-card .success-tag').innerHTML = isBest ? '<span class="success-check"><svg><use href="#icon-check" /></svg></span> Best match' : '<span class="success-check"><svg><use href="#icon-route" /></svg></span> Preview';
   $('#recommendation-card .rank-label').innerHTML = isBest ? 'Rank <b>#1</b>' : `Rank <b>#${state.ranked.findIndex((item) => item.id === station.id) + 1}</b>`;
   $('#recommendation-reason-text').textContent = isBest
     ? `${station.name} is the highest-scoring eligible stop: close enough for a safe arrival, available now, and below your ${state.chargeTime}-minute patience target.`
-    : `You are previewing an alternative. It remains inside your current guardrail, but the greedy engine ranks ${best?.name || 'another option'} higher right now.`;
+    : `You are previewing an alternative candidate. It remains inside your safe buffer, but the greedy engine ranks ${best?.name || 'another stop'} higher right now.`;
   $('#confirm-route').disabled = false;
 }
 
@@ -172,9 +185,9 @@ function renderAlgorithm() {
   const chargePart = Math.max(8, 100 - station.chargeTime * .55);
   const availabilityPart = station.available ? 100 : 34;
   bars.innerHTML = [
-    ['distance', distancePart, `${Math.round(distancePart)}`],
-    ['charge time', chargePart, `${Math.round(chargePart)}`],
-    ['availability', availabilityPart, `${Math.round(availabilityPart)}`]
+    ['DISTANCE COST', distancePart, `${Math.round(distancePart)}%`],
+    ['CHARGE TIME', chargePart, `${Math.round(chargePart)}%`],
+    ['AVAILABILITY', availabilityPart, `${Math.round(availabilityPart)}%`]
   ].map(([label, width, value]) => `<div class="score-bar-row"><span>${label}</span><span class="score-track"><span class="score-fill" style="width:${width}%"></span></span><b>${value}</b></div>`).join('');
 }
 
@@ -197,13 +210,98 @@ function showToast(message) {
   toastTimer = setTimeout(() => $('#toast').classList.remove('show'), 2600);
 }
 
-[batteryInput, distanceInput, chargeTimeInput].forEach((input) => input.addEventListener('input', () => { state.focusId = null; render(); }));
-availabilityInput.addEventListener('change', () => { state.focusId = null; render(); showToast('Availability filter updated.'); });
-$('#recalculate').addEventListener('click', () => { state.focusId = state.ranked[0]?.id || null; render(); showToast(state.ranked[0] ? `${state.ranked[0].name} is your smartest stop.` : 'No station clears the current guardrails.'); });
-$('#reset-view').addEventListener('click', () => { Object.entries(defaults).forEach(([key, value]) => { if (key === 'availability') availabilityInput.value = value; else document.getElementById(key === 'battery' ? 'battery' : key === 'distance' ? 'distance' : 'charge-time').value = value; }); state.focusId = null; render(); showToast('Planner reset to the demo scenario.'); });
-$('#confirm-route').addEventListener('click', () => { const station = focusedStation(); if (station) { state.confirmed = true; showToast(`${station.name} added to your route.`); $('#confirm-route').innerHTML = '<span>Route selected</span><svg><use href="#icon-check" /></svg>'; } });
-$$('.station-pin').forEach((pin) => pin.addEventListener('click', () => { const station = stationById(pin.dataset.station); if (!station) return; if (getStatus(station).type === 'unreachable') { showToast(`${station.name} is outside your current safe range.`); return; } state.focusId = station.id; render(); }));
-$('#explain-toggle').addEventListener('click', () => { const panel = $('#explanation-panel'); const open = !panel.hidden; panel.hidden = open; $('#explain-toggle').classList.toggle('open', !open); $('#explain-toggle span').textContent = open ? 'How the score works' : 'Hide score details'; });
-$('#toggle-all').addEventListener('click', () => { const panel = $('#explanation-panel'); if (panel.hidden) { panel.hidden = false; $('#explain-toggle').classList.add('open'); $('#explain-toggle span').textContent = 'Hide score details'; } document.getElementById('how-it-works').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+// Preset Handlers
+const presets = {
+  'default': { battery: 64, distance: 18, chargeTime: 35, availability: 'available', name: 'Standard Scenario' },
+  'low-batt': { battery: 18, distance: 10, chargeTime: 25, availability: 'available', name: 'Low Battery Alert' },
+  'long-haul': { battery: 85, distance: 32, chargeTime: 50, availability: 'available', name: 'Long-Haul Sprint' },
+  'fast-only': { battery: 45, distance: 22, chargeTime: 25, availability: 'fast', name: 'High-Power Stalls Only' }
+};
+
+$$('.preset-chip').forEach((chip) => {
+  chip.addEventListener('click', () => {
+    $$('.preset-chip').forEach((c) => c.classList.remove('active'));
+    chip.classList.add('active');
+    const p = presets[chip.dataset.preset];
+    if (p) {
+      batteryInput.value = p.battery;
+      distanceInput.value = p.distance;
+      chargeTimeInput.value = p.chargeTime;
+      availabilityInput.value = p.availability;
+      state.focusId = null;
+      render();
+      showToast(`Activated ${p.name}`);
+    }
+  });
+});
+
+[batteryInput, distanceInput, chargeTimeInput].forEach((input) => input.addEventListener('input', () => {
+  $$('.preset-chip').forEach((c) => c.classList.remove('active'));
+  state.focusId = null;
+  render();
+}));
+
+availabilityInput.addEventListener('change', () => {
+  $$('.preset-chip').forEach((c) => c.classList.remove('active'));
+  state.focusId = null;
+  render();
+  showToast('Availability filter updated.');
+});
+
+$('#recalculate').addEventListener('click', () => {
+  state.focusId = state.ranked[0]?.id || null;
+  render();
+  showToast(state.ranked[0] ? `${state.ranked[0].name} recalculated as optimal.` : 'No station clears current constraints.');
+});
+
+$('#reset-view').addEventListener('click', () => {
+  Object.entries(defaults).forEach(([key, value]) => {
+    if (key === 'availability') availabilityInput.value = value;
+    else document.getElementById(key === 'battery' ? 'battery' : key === 'distance' ? 'distance' : 'charge-time').value = value;
+  });
+  $$('.preset-chip').forEach((c) => c.classList.remove('active'));
+  $('#preset-default')?.classList.add('active');
+  state.focusId = null;
+  render();
+  showToast('Planner reset to default parameters.');
+});
+
+$('#confirm-route').addEventListener('click', () => {
+  const station = focusedStation();
+  if (station) {
+    state.confirmed = true;
+    showToast(`${station.name} locked into vehicle navigation.`);
+    $('#confirm-route').innerHTML = '<span>Route Synced to Vehicle</span><svg><use href="#icon-check" /></svg>';
+  }
+});
+
+$$('.station-pin').forEach((pin) => pin.addEventListener('click', () => {
+  const station = stationById(pin.dataset.station);
+  if (!station) return;
+  if (getStatus(station).type === 'unreachable') {
+    showToast(`${station.name} is outside safe battery range.`);
+    return;
+  }
+  state.focusId = station.id;
+  render();
+}));
+
+$('#explain-toggle').addEventListener('click', () => {
+  const panel = $('#explanation-panel');
+  const open = !panel.hidden;
+  panel.hidden = open;
+  $('#explain-toggle').classList.toggle('open', !open);
+  $('#explain-toggle span').textContent = open ? 'How the score works' : 'Hide score details';
+});
+
+$('#toggle-all').addEventListener('click', () => {
+  const panel = $('#explanation-panel');
+  if (panel.hidden) {
+    panel.hidden = false;
+    $('#explain-toggle').classList.add('open');
+    $('#explain-toggle span').textContent = 'Hide score details';
+  }
+  document.getElementById('how-it-works').scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
 
 render();
