@@ -695,8 +695,8 @@ $('#sound-toggle')?.addEventListener('click', () => {
   $('#sound-toggle').classList.toggle('active', active);
   $('#sound-icon-on').style.display = active ? 'block' : 'none';
   $('#sound-icon-off').style.display = active ? 'none' : 'block';
-  $('#sound-label').textContent = active ? 'AUDIO: ON' : 'AUDIO: OFF';
-  showToast(active ? 'Interface audio effects enabled.' : 'Interface audio muted.');
+  $('#sound-toggle').setAttribute('title', active ? 'UI Sound Effects: Active' : 'UI Sound Effects: Muted (Click to enable)');
+  showToast(active ? 'Sound effects enabled.' : 'Sound muted.');
 });
 
 // 11. Presenter Hotkeys (1-4: Presets, R: Recalculate, E: Explain, S: Stepper, Esc: Close)
