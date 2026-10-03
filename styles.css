@@ -140,6 +140,41 @@ input[type='range']::-moz-range-thumb { width: 10px; height: 10px; background: #
 
 @keyframes live { 0%, 100% { opacity: 1; } 50% { opacity: .45; } } @keyframes spin { to { transform: rotate(338deg); } } @keyframes pulse { 0% { transform: scale(.66); opacity: .8; } 80%, 100% { transform: scale(1.6); opacity: 0; } } @keyframes routeFlow { to { stroke-dashoffset: -36; } } @keyframes reveal { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
+/* Motion-inspired interaction layer: energetic, but still calm enough for a live demo. */
+.motion-ready .hero-copy > *, .motion-ready .topbar { opacity: 0; }
+.motion-ready .hero-copy > *.motion-visible, .motion-ready .topbar.motion-visible { opacity: 1; }
+.scroll-reveal { opacity: 0; transform: translateY(24px) scale(.985); transition: opacity .75s cubic-bezier(.22,1,.36,1), transform .75s cubic-bezier(.22,1,.36,1); }
+.scroll-reveal.in-view { opacity: 1; transform: translateY(0) scale(1); }
+.hero-orbit { will-change: transform; animation: orbitBreathe 5.5s ease-in-out infinite; }
+.hero-orbit::after { content: ''; position: absolute; inset: 16px 25px; border-radius: 50%; background: radial-gradient(circle, rgba(17,197,232,.11), transparent 63%); filter: blur(10px); animation: coreGlow 3.5s ease-in-out infinite; }
+.orbit-core, .orbit-spark { z-index: 1; }
+.glass-card { transition: box-shadow .4s ease, border-color .4s ease, transform .4s cubic-bezier(.22,1,.36,1); }
+.glass-card:hover { border-color: rgba(17,197,232,.28); box-shadow: 0 22px 70px rgba(37,113,132,.14); }
+.control-card { will-change: transform; }
+.control-card:hover { transform: translateY(-3px); }
+.primary-button, .route-button, .outline-button, .icon-button, .avatar { will-change: transform; }
+.primary-button:active, .route-button:active { transform: scale(.97); }
+.station-row { animation: stationIn .55s cubic-bezier(.22,1,.36,1) both; }
+.station-row:nth-child(2) { animation-delay: .06s; }.station-row:nth-child(3) { animation-delay: .12s; }.station-row:nth-child(4) { animation-delay: .18s; }
+.recommendation-card { transform-style: preserve-3d; }
+.recommendation-score strong { text-shadow: 0 0 18px rgba(116,85,246,.18); }
+.active-route, .route-shadow { transition: d .7s cubic-bezier(.22,1,.36,1); }
+.map-canvas { isolation: isolate; }
+.map-canvas::before { content: ''; position: absolute; z-index: 1; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,.28) 49%, transparent 63%); transform: translateX(-100%); animation: mapSweep 8s ease-in-out infinite; }
+.station-pin { will-change: transform; }
+.station-pin.selected { animation: pinSelect .8s cubic-bezier(.34,1.56,.64,1) both; }
+.algorithm-section .step-icon { transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease; }
+.algo-step:hover .step-icon { transform: translateY(-4px) rotate(-5deg); box-shadow: 0 10px 18px rgba(17,197,232,.14); }
+@keyframes orbitBreathe { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(1deg); } }
+@keyframes coreGlow { 0%,100% { opacity: .5; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.08); } }
+@keyframes stationIn { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes pinSelect { 0% { transform: scale(.86); } 70% { transform: scale(1.16); } 100% { transform: scale(1); } }
+@keyframes mapSweep { 0%, 65%, 100% { transform: translateX(-100%); } 82% { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  .motion-ready .hero-copy > *, .motion-ready .topbar, .scroll-reveal { opacity: 1 !important; transform: none !important; }
+}
+
 @media (max-width: 1100px) { .page-shell { padding: 0 28px 25px; }.topnav { margin-left: 30px; }.hero-orbit { margin-right: 2%; }.dashboard-grid { grid-template-columns: 1.15fr .85fr; }.route-foot { grid-template-columns: repeat(3, 1fr); }.route-confidence { grid-column: span 3; justify-content: flex-start; padding: 7px 0 0; border-left: 0; border-top: 1px solid var(--line); }.input-grid { grid-template-columns: 1fr 1fr; }.explanation-panel { grid-template-columns: 1fr 1fr; }.explanation-note { grid-column: span 2; } }
 @media (max-width: 820px) { .page-shell { padding: 0 18px 23px; }.topbar { height: 70px; }.topnav { display: none; }.topbar-actions { margin-left: auto; }.hero-block { min-height: 300px; padding-top: 36px; }.hero-orbit { position: absolute; right: -15px; top: 50px; opacity: .48; }.hero-copy { max-width: 560px; }.dashboard-grid { grid-template-columns: 1fr; }.results-column { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }.map-canvas { height: 335px; }.algorithm-steps { grid-template-columns: 1fr; gap: 14px; }.step-connector { width: 1px; height: 20px; margin: 0 0 0 53px; }.step-connector::after { top: 8px; right: -7px; transform: rotate(90deg); }.algorithm-header { align-items: flex-start; gap: 15px; }.algorithm-header h2 { font-size: 18px; }.explanation-panel { grid-template-columns: 1fr; }.explanation-note { grid-column: auto; }.footer { flex-wrap: wrap; gap: 11px; } }
 @media (max-width: 580px) { .page-shell { padding: 0 12px 20px; }.topbar { height: 64px; }.live-pill { display: none; }.hero-block { min-height: 325px; padding: 38px 6px 20px; align-items: flex-start; }.hero-orbit { right: -95px; top: 118px; transform: scale(.82); opacity: .44; }.hero-lede { max-width: 315px; font-size: 12px; }.hero-proof { gap: 12px; }.proof-item small { font-size: 8px; }.input-panel { padding: 18px 14px 14px; border-radius: 18px; }.panel-heading { display: block; }.panel-tip { margin-top: 12px; }.input-grid { grid-template-columns: 1fr; gap: 9px; margin-top: 15px; }.control-card { padding: 12px; }.input-footer { align-items: stretch; flex-direction: column; margin-top: 12px; gap: 12px; }.primary-button { width: 100%; }.map-header { padding: 18px 15px 13px; }.map-header h2 { font-size: 17px; }.map-mode { padding: 6px 7px; font-size: 8px; }.map-canvas { height: 330px; margin: 0 7px; }.map-legend { left: 10px; right: 10px; gap: 7px; justify-content: space-between; font-size: 7px; }.route-foot { padding: 13px 15px 16px; gap: 12px 8px; }.route-stat strong { font-size: 10px; }.route-stat small { font-size: 7px; }.results-column { display: flex; }.recommendation-card, .alternatives-card { border-radius: 18px; }.algorithm-section { padding: 18px 14px; border-radius: 18px; }.algorithm-header { display: block; }.outline-button { margin-top: 13px; }.footer { padding: 22px 3px 0; font-size: 7px; }.footer > span:nth-child(2) { order: 3; width: 100%; }.toast { right: 15px; bottom: 15px; } }

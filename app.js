@@ -107,6 +107,7 @@ function renderStationList() {
       <span class="station-score"><strong>${Math.round(station.score)}</strong><small>score</small></span>
     </button>`;
   }).join('');
+  window.ChargePathMotion?.reveal(list.querySelectorAll('.station-row'), { duration: 460, stagger: 55, y: 10, scale: .99 });
   $$('#station-list [data-row-station]').forEach((row) => row.addEventListener('click', () => {
     state.focusId = row.dataset.rowStation;
     render();
@@ -136,6 +137,7 @@ function renderRecommendation() {
   $('#recommendation-name').textContent = station.name;
   $('#recommendation-address').innerHTML = `<svg><use href="#icon-pin" /></svg> ${station.shortAddress}`;
   $('#recommendation-score').textContent = Math.round(calculateScore(station));
+  window.ChargePathMotion?.countTo($('#recommendation-score'), Math.round(calculateScore(station)), 560);
   $('#recommendation-distance').textContent = formatDistance(station.distance);
   $('#recommendation-time').textContent = `${station.chargeTime} min`;
   $('#recommendation-status').textContent = `${station.open} / ${station.total} open`;
@@ -158,6 +160,8 @@ function renderMap() {
   if (!station) return;
   $('#active-route').setAttribute('d', station.route);
   $('#route-shadow').setAttribute('d', station.route);
+  window.ChargePathMotion?.drawRoute($('#active-route'));
+  window.ChargePathMotion?.drawRoute($('#route-shadow'));
 }
 
 function renderAlgorithm() {
@@ -182,6 +186,7 @@ function render() {
   renderRecommendation();
   renderMap();
   renderAlgorithm();
+  window.ChargePathMotion?.pop($('#recommendation-card'), 1.01);
 }
 
 let toastTimer;

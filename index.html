@@ -53,7 +53,7 @@
             <p class="hero-lede">A transparent way to find your smartest charging stop — balancing range, time, and availability in one glance.</p>
             <div class="hero-proof">
               <div class="proof-item"><span class="proof-icon cyan"><svg><use href="#icon-route" /></svg></span><span><strong>4 inputs</strong><small>nothing hidden</small></span></div>
-              <div class="proof-item"><span class="proof-icon violet"><svg><use href="#icon-sliders" /></svg></span><span><strong>Greedy ranked</strong><small>fully explainable</small></span></div>
+              <div class="proof-item"><span class="proof-icon violet"><svg><use href="#icon-sliders" /></svg></span><span><strong>Dijkstra + Greedy</strong><small>fully explainable</small></span></div>
             </div>
           </div>
           <div class="hero-orbit" aria-hidden="true">
@@ -138,15 +138,16 @@
         </section>
 
         <section class="algorithm-section glass-card" id="how-it-works">
-          <div class="algorithm-header"><div><p class="section-kicker">04 / The DAA layer</p><h2>Not just the nearest. The smartest.</h2><p>ChargePath uses a greedy strategy: filter what is impossible, then take the best available score right now.</p></div><button class="outline-button" id="explain-toggle"><span>How the score works</span><svg><use href="#icon-chevron" /></svg></button></div>
-          <div class="algorithm-steps"><div class="algo-step"><span class="step-number">01</span><div class="step-icon cyan"><svg><use href="#icon-sliders" /></svg></div><div><h3>Filter</h3><p>Remove unavailable stations and any stop outside your safe battery + distance window.</p></div></div><div class="step-connector"></div><div class="algo-step"><span class="step-number">02</span><div class="step-icon violet"><svg><use href="#icon-grid" /></svg></div><div><h3>Score</h3><p>Normalize distance and charging time, then blend them into one comparable match score.</p></div></div><div class="step-connector"></div><div class="algo-step"><span class="step-number">03</span><div class="step-icon mint"><svg><use href="#icon-check" /></svg></div><div><h3>Choose</h3><p>Greedily select the highest score, with distance as the tie-breaker.</p></div></div></div>
+              <div class="algorithm-header"><div><p class="section-kicker">04 / The DAA layer</p><h2>Not just the nearest. The smartest.</h2><p>Dijkstra finds the shortest route. Greedy ranking chooses the best eligible stop right now.</p></div><button class="outline-button" id="explain-toggle"><span>How the score works</span><svg><use href="#icon-chevron" /></svg></button></div>
+              <div class="algorithm-steps"><div class="algo-step"><span class="step-number">01</span><div class="step-icon cyan"><svg><use href="#icon-route" /></svg></div><div><h3>Find the route</h3><p>Dijkstra explores the simulated road graph and reconstructs the shortest path to every station.</p></div></div><div class="step-connector"></div><div class="algo-step"><span class="step-number">02</span><div class="step-icon violet"><svg><use href="#icon-grid" /></svg></div><div><h3>Filter + score</h3><p>Remove impossible stops, then blend route distance, charging time, and availability.</p></div></div><div class="step-connector"></div><div class="algo-step"><span class="step-number">03</span><div class="step-icon mint"><svg><use href="#icon-check" /></svg></div><div><h3>Choose greedily</h3><p>Select the highest score, with shortest distance as the tie-breaker.</p></div></div></div>
               <div class="explanation-panel" id="explanation-panel" hidden><div class="formula-box"><span class="formula-label">Current scoring formula</span><code>match = 100 − (distance × 2.1) − (chargeTime × 0.55) − time overshoot + availability bonus</code></div><div class="score-bars" id="score-bars"></div><div class="explanation-note"><svg><use href="#icon-info" /></svg><span>Battery feasibility is a hard gate, not a soft preference. That is why a farther available station can still beat a closer unavailable one.</span></div></div>
         </section>
       </main>
 
-      <footer class="footer" id="about"><span class="footer-brand"><span class="brand-mark small"><svg><use href="#icon-bolt" /></svg></span> chargepath</span><span>Built for the road ahead · Frontend demo · DAA / Greedy</span><span class="footer-status"><span class="live-dot"></span> All systems simulated</span></footer>
+      <footer class="footer" id="about"><span class="footer-brand"><span class="brand-mark small"><svg><use href="#icon-bolt" /></svg></span> chargepath</span><span>Built for the road ahead · Frontend demo · Dijkstra + Greedy</span><span class="footer-status"><span class="live-dot"></span> All systems simulated</span></footer>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite"><span class="toast-icon"><svg><use href="#icon-check" /></svg></span><span id="toast-message">Route locked in.</span></div>
+    <script src="/motion.js" defer></script>
     <script src="/app.js" defer></script>
   </body>
 </html>
